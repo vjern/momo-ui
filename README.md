@@ -3,43 +3,44 @@
 A way to rapidly produce simple interactive UIs for any code.
 
 ```py
-from WebUI import WebUI, widgets
+import momo
 
 
-app = WebUI()
+app = momo.Momo()
 
 
 def bmi(height: float, weight: float) -> float:
-return weight / (height ** 2)
+    return weight / (height ** 2)
 
 
-@app.page('/', 'My BMI')
-def bmi(page):
+@app.page('/')
+def bmi_page():
 
-    # Let's create an UI to compute one's BMI
-
-    # Create height & weight input
-    height_inp = wui.input('My height')
-    weight_inp = wui.input('My weight')
-    # Create button 'Send'
-    send = wui.button('Compute my BMI')
+    with momo.Form() as f:
+        # Create height & weight input
+        height = f.input('My height', required=True)
+        weight = f.input('My weight', required=True)
+        # Create button 'Send'
+        submit = f.button('Compute my BMI')
     # Create inputs area
-    inputs = [
-        [height_inp],
-        [weight_inp],
-        [send]
-    ]
+    inputs = momo.layouts.Column(
+        height,
+        weight,
+        submit,
+    )
     # Create output area
-    output = wui.div()
+    output = momo.div('output\noutput\noutput')
     # organise 
-    layout = [[inputs, output]]
+    layout = momo.layouts.Line(inputs, output)
+
     # Associate action [call <function> then store output in <output area>]
-    send.action = wui.Call(
-        f=bmi,
-        args={'height': height_inp.value, 'weight': weight_inp.value},
-        store_output=output
+    submit.props['onclick'] = app.call(
+        bmi,
+        args={'height': height & float, 'weight': weight & float},
+        output=output
     )
 
     return layout
 ```
 
+![example](img/example.png)
