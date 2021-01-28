@@ -1,4 +1,4 @@
-# Web UI
+# Momo UI
 
 A way to rapidly produce simple interactive UIs for any code.
 
