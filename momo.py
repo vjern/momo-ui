@@ -1,13 +1,38 @@
+import sys
+import json
 from flask import Flask
 from typing import Callable, Any, Dict, List
 from itertools import starmap
 import uuid
 import logging
 from functools import partial
+from contextlib import contextmanager
 
+
+__module__ = sys.modules[__name__]
+
+
+def get_converter(type: type) -> str:
+    return {
+        float: 'Number',
+        int: 'Number'
+    }.get(type, type.__name__)
+
+
+@contextmanager
+def Form():
+    yield __module__
+
+
+class HTMLProxyTyper:
+    def __init__(self, proxy, type):
+        self.proxy = proxy
+        self.type = type
 
 
 class HTMLProxy:
+
+    valuename = 'value'
 
     def __init__(self, content: str = '', tag: str = 'div', style: str = '', **props):
         self.props = props
@@ -32,6 +57,9 @@ class HTMLProxy:
             props.pop('style')
         return tag(self.tag, self.get_content() or self.content, id=self.id, **props)
 
+    def __and__(self, other: type):
+        return HTMLProxyTyper(self, other)
+
 
 def tag(tag: str, content: str = '', notail: bool = False, flags: List[str] = [], **kw) -> str:
     skw = ' '.join(starmap('{}={!r}'.format, kw.items()))
@@ -54,6 +82,7 @@ class input(HTMLProxy):
 
 div = partial(HTMLProxy, tag='div')
 button = partial(HTMLProxy, tag='button')
+submit = partial(input, type='submit')
 
 
 def interpret_layout(layout):
@@ -68,6 +97,8 @@ def get_html(title: str, layout):
         <meta charset='UTF-8'>
     </head>
     <body>
+    <script src="/static/scripts/http.js">
+    </script>
         {interpret_layout(layout)}
     <style>
 {open('style.css').read()}
@@ -97,8 +128,8 @@ class Layout(Container, HTMLProxy):
     def get_content(self):
         self.children = list(self.children)
         for child in self.children:
-        #     # pass
-            child.props['style'] = f'{self.compstyle}; {self.axis}: %.0f%%' % (95 / (len(self.children) or 1))
+            w = 95 / (len(self.children) or 1)
+            child.props['style'] = f'{self.compstyle}; {self.axis}: {w:.0f}%'
         logging.warning(f'{self.children = }')
         return ' '.join(map(str, self.children))
 
@@ -108,12 +139,12 @@ class layouts:
         axis = 'height'
         compstyle = 'display: block'
     class Line(Layout):
-        compstyle = 'display: inline-block'
+        compstyle = 'display: inline-block; height: 100%'
 
 class Momo:
 
     def __init__(self):
-        self.app = Flask(__name__)
+        self.app = Flask(__name__, static_folder='static')
 
     def page(self, route: str, title: str = None):
         def decorator(f):
@@ -127,7 +158,28 @@ class Momo:
     def run(self, *a, **kw):
         return self.app.run(*a, **kw)
 
-    def call(self, f: Callable, args: Dict[str, Any]):
+    def call(self, f: Callable, args: Dict[str, Any] = None, output: HTMLProxy = None):
         # Check if endpoint exists for f, otherwise create it
         # endpoint = self.get_endpoint(f)
-        pass
+
+        call = f'http.summon("/{f.__name__}"'
+
+        argv = []
+        if args:
+            for key, value in args.items():
+                if isinstance(value, HTMLProxy):
+                    value = f'document.getElementById("{value.id}").{value.valuename}'
+                elif isinstance(value, HTMLProxyTyper):
+                    value = f'{get_converter(value.type)}(document.getElementById("{value.proxy.id}").{value.proxy.valuename})'
+
+                else:
+                    value = json.dumps(value)
+                argv.append(f'{key}: {value}')
+        call += ', {%s}' % ', '.join(argv)
+
+        if output:
+            call += f', "{output.id}"'
+
+        call += ')'
+
+        return call
