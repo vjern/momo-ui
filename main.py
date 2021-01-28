@@ -44,9 +44,10 @@ def bmi_page():
 
     return layout
 
-@app.app.route('/bmi', methods=['POST'])
-def bmi_endpoint():
-    return {'result': bmi(**request.json)}
+
+# @app.app.route('/bmi', methods=['POST'])
+# def bmi_endpoint():
+#     return {'result': bmi(**request.json)}
 
 
 if __name__ == '__main__':

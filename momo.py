@@ -1,6 +1,6 @@
 import sys
 import json
-from flask import Flask
+from flask import Flask, request
 from typing import Callable, Any, Dict, List
 from itertools import starmap
 import uuid
@@ -23,6 +23,12 @@ def get_converter(type: type) -> str:
 def Form():
     yield __module__
 
+
+def make_endpoint(f: Callable) -> Callable:
+    def wrapper(*a):
+        return {'result': f(*a, **request.json)}
+    wrapper.__name__ = f'{f.__name__}_wrapper'
+    return wrapper
 
 class HTMLProxyTyper:
     def __init__(self, proxy, type):
@@ -145,6 +151,7 @@ class Momo:
 
     def __init__(self):
         self.app = Flask(__name__, static_folder='static')
+        self.endpoints = {}
 
     def page(self, route: str, title: str = None):
         def decorator(f):
@@ -158,11 +165,19 @@ class Momo:
     def run(self, *a, **kw):
         return self.app.run(*a, **kw)
 
+    def ensure_endpoint(self, f):
+        name = f.__name__
+        endpoint = self.endpoints.get(name)
+        if endpoint is None:
+            endpoint = self.app.route(f'/{name}', methods=['POST'])(make_endpoint(f))
+            self.endpoints = endpoint
+        return name
+
     def call(self, f: Callable, args: Dict[str, Any] = None, output: HTMLProxy = None):
         # Check if endpoint exists for f, otherwise create it
         # endpoint = self.get_endpoint(f)
 
-        call = f'http.summon("/{f.__name__}"'
+        call = f'http.summon("/{self.ensure_endpoint(f)}"'
 
         argv = []
         if args:
