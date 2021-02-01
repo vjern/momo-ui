@@ -21,12 +21,14 @@ def bmi_page():
     with momo.Form() as f:
         height = f.input('My height', required=True)
         weight = f.input('My weight', required=True)
+        x = f.select({'a': 3, 'b': 4})
     # Create button 'Send'
         submit = f.button('Compute my BMI')
     # Create inputs area
     inputs = layout.Column(
         height,
         weight,
+        x,
         submit,
     )
     # inputs.style = 'border: 1px solid gold'

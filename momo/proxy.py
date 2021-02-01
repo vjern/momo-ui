@@ -30,7 +30,7 @@ class HTMLProxy:
         props = self.props
         if compiled_style:
             props = {**self.props, 'style': compiled_style}
-        else:
+        elif 'style' in self.props:
             props.pop('style')
         return tag(self.tag, self.get_content() or self.content, id=self.id, **props)
 

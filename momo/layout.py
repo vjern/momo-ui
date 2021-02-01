@@ -10,6 +10,8 @@ class Container:
         self.children.append(child)
     def prepend(self, child):
         self.children.insert(0, child)
+    def get_content(self):
+        return ' '.join(map(str, self.children))
 
 
 class Layout(Container, HTMLProxy):

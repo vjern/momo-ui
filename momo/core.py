@@ -1,7 +1,7 @@
 import sys
 import json
 from flask import Flask, request
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, Union, List
 import pathlib
 from functools import partial
 from contextlib import contextmanager
@@ -9,6 +9,8 @@ from contextlib import contextmanager
 from .htmlt import pretty_html
 from .jst import get_converter
 from .proxy import HTMLProxy, HTMLProxyTyper
+from .layout import Container, Layout
+
 
 __module__ = sys.modules[__name__]
 __folder__ = pathlib.Path(__file__).parent
@@ -18,52 +20,6 @@ __folder__ = pathlib.Path(__file__).parent
 def Form():
     yield __module__
 
-
-def make_endpoint(f: Callable) -> Callable:
-    def wrapper(*a):
-        return {'result': f(*a, **request.json)}
-    wrapper.__name__ = f'{f.__name__}_wrapper'
-    return wrapper
-
-
-
-class input(HTMLProxy):
-
-    def __init__(self, placeholder: str = '', type: str = 'text', required: bool = False, **props):
-        props = {
-            **props,
-            'type': type,
-            'placeholder': placeholder
-        }
-        super().__init__(tag='input', notail=True, flags=['required'] * required, **props)
-
-
-div = partial(HTMLProxy, tag='div')
-button = partial(HTMLProxy, tag='button')
-submit = partial(input, type='submit')
-
-
-def interpret_layout(layout):
-    return layout
-
-def get_html(title: str, layout):
-    html = f"""
-<!DOCTYPE html>
-<html>
-    <head>
-        <title> {title} </title>
-        <meta charset='UTF-8'/>
-        <link href="/static/styles/style.css" rel="stylesheet"/>
-    </head>
-    <body>
-    <script src="/static/scripts/http.js">
-    </script>
-        {interpret_layout(layout)}
-    </body>
-</html>
-    """
-    html = pretty_html(html)
-    return html
 
 class Momo:
 
@@ -116,3 +72,59 @@ class Momo:
         call += ')'
 
         return call
+
+
+def make_endpoint(f: Callable) -> Callable:
+    def wrapper(*a):
+        return {'result': f(*a, **request.json)}
+    wrapper.__name__ = f'{f.__name__}_wrapper'
+    return wrapper
+
+
+class input(HTMLProxy):
+
+    def __init__(self, placeholder: str = '', type: str = 'text', required: bool = False, **props):
+        props = {
+            **props,
+            'type': type,
+            'placeholder': placeholder
+        }
+        super().__init__(tag='input', notail=True, flags=['required'] * required, **props)
+
+
+class select(Container, HTMLProxy):
+
+    def __init__(self, options: Union[List[str], Dict[str, Any]], required: bool = False, **props):
+        if isinstance(options, list):
+            options = {o: o for o in options}
+        HTMLProxy.__init__(self, tag='select', flags=['required'] * required, **props)
+        Container.__init__(self, *(
+            HTMLProxy(label, 'option', value=value)
+            for value, label in options.items()
+        ))
+        self.options = options
+
+
+div = partial(HTMLProxy, tag='div')
+button = partial(HTMLProxy, tag='button')
+submit = partial(input, type='submit')
+
+
+def get_html(title: str, layout):
+    html = f"""
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> {title} </title>
+        <meta charset='UTF-8'/>
+        <link href="/static/styles/style.css" rel="stylesheet"/>
+    </head>
+    <body>
+    <script src="/static/scripts/http.js">
+    </script>
+        {layout}
+    </body>
+</html>
+    """
+    html = pretty_html(html)
+    return html
