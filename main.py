@@ -1,7 +1,7 @@
 import logging
 
 import momo
-from momo import layouts
+from momo import layout
 from flask import request
 
 
@@ -24,16 +24,16 @@ def bmi_page():
     # Create button 'Send'
         submit = f.button('Compute my BMI')
     # Create inputs area
-    inputs = layouts.Column(
+    inputs = layout.Column(
         height,
         weight,
         submit,
     )
-    inputs.style = 'border: 1px solid gold'
+    # inputs.style = 'border: 1px solid gold'
     # Create output area
-    output = momo.div('output\noutput\noutput', style='border: 1px solid green')
+    output = momo.div('output\noutput\noutput')
     # organise 
-    layout = layouts.Line(inputs, output)
+    l = layout.Line(inputs, output)
     # Associate action [call <function> then store output in <output area>]
 
     submit.props['onclick'] = app.call(
@@ -42,13 +42,15 @@ def bmi_page():
         output=output
     )
 
-    return layout
+    return l
 
 
 # @app.app.route('/bmi', methods=['POST'])
 # def bmi_endpoint():
 #     return {'result': bmi(**request.json)}
 
+
+app = app.app
 
 if __name__ == '__main__':
     app.run(debug=True)

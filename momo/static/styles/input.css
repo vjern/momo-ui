@@ -1,0 +1,24 @@
+.input {
+    margin: 12px 8px;
+    padding: 1px;
+    padding-left: 8px;
+    font-family: sans-serif;
+    max-width: 300px;
+  }
+  
+  .input > * {
+    display: block;
+    margin: 3px;
+  }
+  
+  .input > p {
+    font-size: 13px;
+    margin-bottom: 0;
+  }
+  
+  .input input {
+    margin-top: 6px;
+    border-top: 1px solid lightgray;
+    padding: 6px;
+    border-radius: 4Px;
+  }
