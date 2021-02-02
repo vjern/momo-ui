@@ -1,19 +1,17 @@
-
 html, body {
   margin: 0;
   height: calc(100% - 5px);
   width: 100%;
   font-family: Arial, Helvetica, sans-serif;
 }
-/* 
-.layout .column > * {
-  display: block;
-}
 
-.layout .line > * {
-  display: inline;
-  height: 100%;
-} */
+.layout { display: flex; }
+.column { flex-direction: column; }
+.line { flex-direction: row; }
+
+.layout > * {  margin: 2px; }
+.layout > div { padding: 5px; }
+.layout { padding: 3px; }
   
 body {
   width: 60%;

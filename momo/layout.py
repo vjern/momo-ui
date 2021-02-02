@@ -26,19 +26,12 @@ class Layout(Container, HTMLProxy):
         self.props['class'] = 'layout ' + self.__class__.__name__.lower()
 
     def get_content(self):
-        self.children = list(self.children)
-        for child in self.children:
-            w = 95 / (len(self.children) or 1)
-            child.props['style'] = f'{self.compstyle}; {self.axis}: {w:.0f}%'
-        logging.warning(f'{self.children = }')
         return ' '.join(map(str, self.children))
 
 
 class Column(Layout):
-    axis = 'height'
-    compstyle = 'display: block'
+    pass
 
 
 class Line(Layout):
-    axis = 'width'
-    compstyle = 'display: inline-block; height: 100%'
+    pass

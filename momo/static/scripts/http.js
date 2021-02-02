@@ -41,12 +41,12 @@ const http = {
     .then(response => {
       console.log('response =', response, Object.keys(response));
       if (!response.ok) response.text().then(text => {throw Error(text)});
-      else              return response.text();
+      else              return response.json();
     })
-    .then(text => {
-      console.log(text);
+    .then(json => {
+      console.log(json);
       if (output) {
-        document.getElementById(output).innerHTML = text;
+        document.getElementById(output).innerHTML = json.result;
       }
     })
   }
