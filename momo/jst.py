@@ -1,5 +1,6 @@
 
 
+# from string to X
 def get_converter(type: type) -> str:
     return {
         float: 'Number',
