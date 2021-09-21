@@ -105,6 +105,10 @@ class select(Container, HTMLProxy):
         self.options = options
 
 
+class Output(HTMLProxy):
+    __classes__ = ['output']
+
+
 div = partial(HTMLProxy, tag='div')
 button = partial(HTMLProxy, tag='button')
 submit = partial(input, type='submit')

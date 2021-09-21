@@ -33,7 +33,7 @@ def bmi_page():
     )
     # inputs.style = 'border: 1px solid gold'
     # Create output area
-    output = momo.div('output\noutput\noutput')
+    output = momo.Output()
     # organise 
     l = layout.Line(inputs, output)
     # Associate action [call <function> then store output in <output area>]

@@ -127,3 +127,48 @@ class EventMatrix:
     def pull(self, about: str):  # aka GET /event/<about>
         return self.events.pop(about)
 ```
+
+```py
+
+
+class Page(Element):
+    title: str
+    body: Element
+    scripts: List[Script]
+    styles: List[StyleSheet]
+
+
+def Call(
+    f: Callable,
+    args: Dict[str, Union[
+        Element,  # e.g args = { weight: weight }
+        ElementAttributeHook,  # e.g args = { weight: weight.value }
+        Any,  # anything else as a static arg
+        ]
+    ],
+    output: Element | None | 
+)
+
+
+def compute_bmi(weight: float, height: float) -> float:
+    return weight / height ** 2
+
+
+@app.page('/')
+def home():
+    with Page() as page:
+        page.title = 'Home'
+
+        with page.Panel() as panel:
+            class Inputs:
+                weight = panel.input(label='Your weight', placeholder='Weight', required=True)
+                height = panel.input(label='Your height', placeholder='Height', required=True)
+            panel.Button('Send').action = Call(compute_bmi, args=dict(height=height, weight=weight), to=)
+
+        with page.Form() as form:
+            form.input(id='weight', label='Your weight')
+            form.input(id='height', label='Your height')
+            form.action = compute_bmi
+
+        return page  
+```
